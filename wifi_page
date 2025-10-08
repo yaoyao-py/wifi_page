@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wi-Fi 密码 — 扫码验证</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 18px; background:#f7fafc; color:#111; }
+    .card { max-width:520px; margin:40px auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08); padding:22px; }
+    h1 { font-size:18px; margin:0 0 8px; }
+    p { margin:8px 0 16px; line-height:1.5; color:#333; }
+    .warn { background:#fff3cd; border-left:4px solid #ffdd57; padding:10px; border-radius:6px; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:8px; cursor:pointer; user-select:none; }
+    .btn-primary { background:#2563eb; color:white; }
+    .btn-ghost { background:#eef2ff; color:#111; margin-left:8px; }
+    .secret { font-family: monospace; font-size:20px; letter-spacing:2px; padding:10px 12px; background:#0f172a; color:#e6edf3; border-radius:8px; display:inline-block; }
+    .small { font-size:13px; color:#6b7280; }
+  </style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>提示 — 扫码前请注意</h1>
+    <div class="warn">
+      <p class="small">为防止诈骗与信息泄露：请不要扫描陌生人或可疑来源的二维码；不要向不信任的人展示或转发本二维码。</p>
+    </div>
+
+    <p>若你已经知晓该安全提示并确认来自可信来源并同意，才会显示 Wi-Fi 密码。</p>
+
+    <div id="stage1">
+      <p class="small">是否明白了要谨防诈骗？</p>
+      <button class="btn btn-primary" id="agreeBtn">我已确认，显示密码</button>
+      <button class="btn btn-ghost" id="cancelBtn">取消</button>
+    </div>
+
+    <div id="stage2" style="display:none; margin-top:16px;">
+      <p class="small">网络名称（CMCC-5G）：<strong id="ssidText">Your_SSID_here</strong></p>
+      <p>Wi-Fi 密码：</p>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="secret" id="pwText">***hidden***</div>
+        <button class="btn btn-primary" id="copyBtn">复制密码</button>
+        <button class="btn btn-ghost" id="showToggle">隐藏</button>
+      </div>
+      <p class="small" style="margin-top:10px;">（请仅在可信环境展示；复制后请及时关闭此页面）</p>
+    </div>
+  </div>
+
+  <script>
+    // ====== 在这里设置你的SSID和密码 ======
+    const WIFI_SSID = "Your_SSID_here";            // <- 修改为你的网络名
+    const WIFI_PASSWORD = "*#06#6281144";         // <- 这是你要显示的密码
+    // ======================================
+
+    document.getElementById('ssidText').textContent = WIFI_SSID;
+
+    const agreeBtn = document.getElementById('agreeBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const stage1 = document.getElementById('stage1');
+    const stage2 = document.getElementById('stage2');
+    const pwText = document.getElementById('pwText');
+    const copyBtn = document.getElementById('copyBtn');
+    const showToggle = document.getElementById('showToggle');
+
+    let visible = false;
+
+    agreeBtn.addEventListener('click', () => {
+      stage1.style.display = 'none';
+      stage2.style.display = 'block';
+      visible = true;
+      pwText.textContent = WIFI_PASSWORD;
+      showToggle.textContent = '隐藏';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      // 退出或只隐藏提示
+      stage1.innerHTML = '<p class="small">你已取消查看密码。如需查看请重新扫描。</p>';
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(WIFI_PASSWORD);
+        copyBtn.textContent = '已复制';
+        setTimeout(()=>copyBtn.textContent='复制密码',1300);
+      } catch(e) {
+        alert('复制失败，请手动长按选择并复制密码。');
+      }
+    });
+
+    showToggle.addEventListener('click', () => {
+      if (visible) {
+        pwText.textContent = '••••••••••';
+        showToggle.textContent = '显示';
+        visible = false;
+      } else {
+        pwText.textContent = WIFI_PASSWORD;
+        showToggle.textContent = '隐藏';
+        visible = true;
+      }
+    });
+
+    // 防止浏览器自动保存表单或历史（仅简单处理）
+    window.addEventListener('beforeunload', ()=>{ /* nothing */ });
+  </script>
+</body>
+</html>
